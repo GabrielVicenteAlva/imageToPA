@@ -14,7 +14,7 @@ Type: <select id="type">
 	<option value="3">Spinner</option>
 	<option value="5">Character</option>
 </select><br />
-AutoKill Time: <input id="akt" type="number" value="10"><br />
+AutoKill Time: <input id="ako" type="number" value="10"><br />
 Transparent BG: <input id="transparent" type="checkbox"><br />
 <button id="generate" onclick="generate()">Generate</button><br />
 <canvas id="canvas">Your browser does not support HTML5 canvas</canvas>
@@ -55,7 +55,7 @@ function downloadObjectAsJson(exportObj, exportName){
 
 
 function hex(n){
-	return ('0'+n.toString(16)).split(-2);
+	return ('0'+n.toString(16)).slice(-2);
 }
 function generate(){
 	if(!document.getElementById('file').files[0]){
@@ -68,7 +68,7 @@ function generate(){
 	
 	for(let o of prefab.objects){
 		o.depth = document.getElementById("depth").value;
-		o.akt = document.getElementById("akt").value;
+		o.ako = document.getElementById("ako").value;
 	}
 	var s1='',s2='',c1='',c2='',x=1,transparent = '';
 	var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
