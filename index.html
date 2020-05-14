@@ -2,10 +2,14 @@
 <head><title>Image to PAprefab converter</title></head>
 <body>
 <input type="file" id="file" class="button" accept="image/*" onchange="loadImage()"/><br />
-Name: <input id="name" type="text" value="Image"><br />
-Offset: <input id="offset" type="number" value="0"><br />
-Depth: <input id="depth" type="number" value="30" min="1" max="30" step="1"><br />
-Type: <select id="type">
+<label for="name">Name:</label>
+<input id="name" type="text" value="Image"><br />
+<label for="offset">Offset:</label>
+<input id="offset" type="number" value="0"><br />
+<label for="depth">Depth:</label>
+<input id="depth" type="number" value="29" min="1" max="29" step="1" onchange="depthChange()"> and <input id="depth2" type="number" value="30" size="24" readonly><br />
+<label for="type">Type:</label>
+<select id="type">
 	<option value="6">Misc1</option>
 	<option value="7">Misc2</option>
 	<option value="8">Misc3</option>
@@ -14,13 +18,27 @@ Type: <select id="type">
 	<option value="3">Spinner</option>
 	<option value="5">Character</option>
 </select><br />
-AutoKill Time: <input id="ako" type="number" value="10"><br />
-Transparent BG: <input id="transparent" type="checkbox"><br />
+<label for="ako">AutoKill Time:</label>
+<input id="ako" type="number" value="10"><br />
+<label for="transparent">Transparent BG:</label>
+<input id="transparent" type="checkbox"><br />
 <button id="generate" onclick="generate()">Generate</button><br />
 <canvas id="canvas">Your browser does not support HTML5 canvas</canvas>
+<h3>Take into account:</h3>
+<p>The images are made from &quot;&lt;color=#ffffff&gt;█ &quot; blocks. One of these prefabs has only 5 objects and souldn't lag the whole level.</p>
+<p>They might cause a little lag when being spawned and killed.</p>
+<p>Try not to go beyond 1k pixels.</p>
+<p>Pixel Art is better than detailed images since &quot;&lt;color=#ffffff&gt;█ █ █ █&quot; is better than &quot;&lt;color=#ffffff&gt;█ &lt;color=#fefefe&gt;█ &lt;color=#fdfdfd&gt;█ &lt;color=#fcfcfc&gt;█&quot;.</p>
+<p>One pixel is aproximately 1 unit wide.</p>
+<p>You can expand it and add keyframes to the Parent object.</p>
+<p>If you make pixels too small, █ blocks' smooth borders will start showing. If this occurs, finish editing the Parent object, apply changes to the prefab and add another instance of the prefab at the same time of the first one.</p>
+
 <script src="prefab.js"></script>
 <script>
 var fr,img,canvas,ctx // file reader, image, canvas, context
+function depthChange(){
+	document.getElementById('depth2').value = 1 + parseInt(document.getElementById('depth').value);
+}
 function loadImage() {
 	var input = document.getElementById('file');
 	var file = input.files[0];
@@ -32,8 +50,6 @@ function createImage() {
     img = new Image();
     img.onload = imageLoaded;
     img.src = fr.result;
-    if(img.width*img.height > 20000)
-    	alert('Warning: More than 20k pixels!');
 }
 function imageLoaded() {
     canvas = document.getElementById("canvas")
@@ -41,6 +57,8 @@ function imageLoaded() {
     canvas.height = img.height;
     ctx = canvas.getContext("2d");
     ctx.drawImage(img,0,0);
+    if(img.width*img.height > 20000)
+    	alert('Warning: More than 20k pixels!');
 }
 // https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
 function downloadObjectAsJson(exportObj, exportName){
@@ -67,12 +85,12 @@ function generate(){
 	prefab.type = document.getElementById("type").value;
 	
 	for(let o of prefab.objects){
-		o.depth = document.getElementById("depth").value;
+		o.depth = (o.bin%2) ? document.getElementById("depth").value : document.getElementById("depth2").value;
 		o.ako = document.getElementById("ako").value;
 	}
 	var s1='',s2='',c1='',c2='',x=1,transparent = '';
 	var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-	if (document.getElementById("transparent").value)
+	if (document.getElementById("transparent").checked)
 		transparent = hex(imgData[0]) + (imgData[1]) + (imgData[2]);
 	for (let i = 0; i < imgData.length; i += 4) {
 		var color = '';
@@ -106,6 +124,8 @@ function generate(){
 	t2.text = s2;
 	t12.text = s1;
 	t22.text = s2;
+	t2.events.pos[0].x = String((img.width%2) ? 0 : w*1.5);
+	t22.events.pos[0].x = String((img.width%2) ? 0 : w*1.5);
 	downloadObjectAsJson(prefab,prefab.name.toLowerCase() + '.lsp');
 };
 
@@ -121,30 +141,30 @@ parent.scaEvent(0.,1.,1.);
 parent.rotEvent(0.,0.);
 parent.colEvent(0.,0);
 
-const w = .5
+const w = .65
 t1.posEvent(0.,0.,0.);
 t1.scaEvent(0.,w,w*.6966667);
 t1.rotEvent(0.,0.);
 t1.colEvent(0.,0);
-t2.posEvent(0.,w*1.5,0.);
+t2.posEvent(0.,0,0.);
 t2.scaEvent(0.,w*1.348,w*.6966667);
 t2.rotEvent(0.,0.);
 t2.colEvent(0.,0);
-t1.parent = parent;
+t1.p = parent.name;
 t1.parentOffset(true,true,true);
-t2.parent = parent;
+t2.p = parent.name;
 t2.parentOffset(true,true,true);
 t12.posEvent(0.,0.,w*.5);
 t12.scaEvent(0.,w,w*.696667);
 t12.rotEvent(0.,0.);
 t12.colEvent(0.,0);
-t22.posEvent(0.,w*1.5,w*.5);
+t22.posEvent(0.,0,w*.5);
 t22.scaEvent(0.,w*1.348,w*.696667);
 t22.rotEvent(0.,0.);
 t22.colEvent(0.,0);
-t12.parent = parent;
+t12.p = parent.name;
 t12.parentOffset(true,true,true);
-t22.parent = parent;
+t22.p = parent.name;
 t22.parentOffset(true,true,true);
 
 prefab.clean();
