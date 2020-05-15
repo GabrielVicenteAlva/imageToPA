@@ -26,6 +26,7 @@
 <h3>Take into account:</h3>
 <p>The images are made from &quot;&lt;color=#ffffff&gt;█ &quot; blocks. One of these prefabs has only 5 objects and souldn't lag the whole level, but will increase the level loading time.</p>
 <p>They might cause a little lag when being spawned and killed.</p>
+<p>Prefab takes two depth layers</p>
 <p>Try not to go beyond 1k pixels.</p>
 <p>Does not support RGBA</p>
 <p>Checking Transparent BG makes invisible pixels the same color of the first pixel</p>
@@ -85,7 +86,7 @@ function generate(){
 	prefab.type = document.getElementById("type").value;
 	
 	for(let o of prefab.objects){
-		o.depth = (parseInt(o.ed.bin)%2) ? document.getElementById("depth").value : document.getElementById("depth2").value;
+		o.d = (parseInt(o.ed.bin)%2) ? document.getElementById("depth").value : document.getElementById("depth2").value;
 		o.ako = document.getElementById("ako").value;
 	}
 	let s1='',s2='',c1='',c2='',x=1,transparent = '';
@@ -141,13 +142,13 @@ parent.scaEvent(0.,1.,1.);
 parent.rotEvent(0.,0.);
 parent.colEvent(0.,0);
 
-const w = .65
+const w = .68
 t1.posEvent(0.,0.,0.);
-t1.scaEvent(0.,w,w*.6966667);
+t1.scaEvent(0.,w,w*.733333);
 t1.rotEvent(0.,0.);
 t1.colEvent(0.,0);
 t2.posEvent(0.,0,0.);
-t2.scaEvent(0.,w*1.348,w*.6966667);
+t2.scaEvent(0.,w*1.348,w*.733333);
 t2.rotEvent(0.,0.);
 t2.colEvent(0.,0);
 t1.p = parent.id;
@@ -155,11 +156,11 @@ t1.parentOffset(true,true,true);
 t2.p = parent.id;
 t2.parentOffset(true,true,true);
 t12.posEvent(0.,0.,w*.5);
-t12.scaEvent(0.,w,w*.696667);
+t12.scaEvent(0.,w,w*.733333);
 t12.rotEvent(0.,0.);
 t12.colEvent(0.,0);
 t22.posEvent(0.,0,w*.5);
-t22.scaEvent(0.,w*1.348,w*.696667);
+t22.scaEvent(0.,w*1.348,w*.733333);
 t22.rotEvent(0.,0.);
 t22.colEvent(0.,0);
 t12.p = parent.id;
