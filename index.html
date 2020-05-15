@@ -25,7 +25,7 @@
 <button id="generate" onclick="generate()">Generate</button><br />
 <canvas id="canvas">Your browser does not support HTML5 canvas</canvas>
 <h3>Take into account:</h3>
-<p>The images are made from &quot;&lt;color=#ffffff&gt;█ &quot; blocks. One of these prefabs has only 5 objects and souldn't lag the whole level.</p>
+<p>The images are made from &quot;&lt;color=#ffffff&gt;█ &quot; blocks. One of these prefabs has only 5 objects and souldn't lag the whole level, but will increase the level loading time.</p>
 <p>They might cause a little lag when being spawned and killed.</p>
 <p>Try not to go beyond 1k pixels.</p>
 <p>Pixel Art is better than detailed images since &quot;&lt;color=#ffffff&gt;█ █ █ █&quot; is better than &quot;&lt;color=#ffffff&gt;█ &lt;color=#fefefe&gt;█ &lt;color=#fdfdfd&gt;█ &lt;color=#fcfcfc&gt;█&quot;.</p>
@@ -85,13 +85,13 @@ function generate(){
 	prefab.type = document.getElementById("type").value;
 	
 	for(let o of prefab.objects){
-		o.depth = (o.bin%2) ? document.getElementById("depth").value : document.getElementById("depth2").value;
+		o.depth = (parseInt(o.ed.bin)%2) ? document.getElementById("depth").value : document.getElementById("depth2").value;
 		o.ako = document.getElementById("ako").value;
 	}
-	var s1='',s2='',c1='',c2='',x=1,transparent = '';
-	var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+	let s1='',s2='',c1='',c2='',x=1,transparent = '';
+	let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 	if (document.getElementById("transparent").checked)
-		transparent = hex(imgData[0]) + (imgData[1]) + (imgData[2]);
+		transparent = hex(imgData[0]) + hex(imgData[1]) + hex(imgData[2]);
 	for (let i = 0; i < imgData.length; i += 4) {
 		var color = '';
 		color += hex(imgData[i]);
@@ -150,9 +150,9 @@ t2.posEvent(0.,0,0.);
 t2.scaEvent(0.,w*1.348,w*.6966667);
 t2.rotEvent(0.,0.);
 t2.colEvent(0.,0);
-t1.p = parent.name;
+t1.p = parent.id;
 t1.parentOffset(true,true,true);
-t2.p = parent.name;
+t2.p = parent.id;
 t2.parentOffset(true,true,true);
 t12.posEvent(0.,0.,w*.5);
 t12.scaEvent(0.,w,w*.696667);
@@ -162,9 +162,9 @@ t22.posEvent(0.,0,w*.5);
 t22.scaEvent(0.,w*1.348,w*.696667);
 t22.rotEvent(0.,0.);
 t22.colEvent(0.,0);
-t12.p = parent.name;
+t12.p = parent.id;
 t12.parentOffset(true,true,true);
-t22.p = parent.name;
+t22.p = parent.id;
 t22.parentOffset(true,true,true);
 
 prefab.clean();
