@@ -1,11 +1,10 @@
 <html>
 <head><title>Image to PAprefab converter</title></head>
 <body>
+<label for="file">File:</label>
 <input type="file" id="file" class="button" accept="image/*" onchange="loadImage()"/><br />
 <label for="name">Name:</label>
 <input id="name" type="text" value="Image"><br />
-<label for="offset">Offset:</label>
-<input id="offset" type="number" value="0"><br />
 <label for="depth">Depth:</label>
 <input id="depth" type="number" value="29" min="1" max="29" step="1" onchange="depthChange()"> and <input id="depth2" type="number" value="30" size="24" readonly><br />
 <label for="type">Type:</label>
@@ -19,7 +18,7 @@
 	<option value="5">Character</option>
 </select><br />
 <label for="ako">AutoKill Time:</label>
-<input id="ako" type="number" value="10"><br />
+<input id="ako" type="number" value="15"><br />
 <label for="transparent">Transparent BG:</label>
 <input id="transparent" type="checkbox"><br />
 <button id="generate" onclick="generate()">Generate</button><br />
@@ -28,6 +27,8 @@
 <p>The images are made from &quot;&lt;color=#ffffff&gt;█ &quot; blocks. One of these prefabs has only 5 objects and souldn't lag the whole level, but will increase the level loading time.</p>
 <p>They might cause a little lag when being spawned and killed.</p>
 <p>Try not to go beyond 1k pixels.</p>
+<p>Does not support RGBA</p>
+<p>Checking Transparent BG makes invisible pixels the same color of the first pixel</p>
 <p>Pixel Art is better than detailed images since &quot;&lt;color=#ffffff&gt;█ █ █ █&quot; is better than &quot;&lt;color=#ffffff&gt;█ &lt;color=#fefefe&gt;█ &lt;color=#fdfdfd&gt;█ &lt;color=#fcfcfc&gt;█&quot;.</p>
 <p>One pixel is aproximately 1 unit wide.</p>
 <p>You can expand it and add keyframes to the Parent object.</p>
@@ -81,7 +82,6 @@ function generate(){
 		return;
 	}
 	prefab.name = document.getElementById("name").value;
-	prefab.offset = document.getElementById("offset").value;
 	prefab.type = document.getElementById("type").value;
 	
 	for(let o of prefab.objects){
