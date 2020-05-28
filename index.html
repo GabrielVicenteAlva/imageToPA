@@ -1,45 +1,60 @@
 <html>
 <head><title>Image to PAprefab converter</title></head>
-<body>
-<label for="file">File:</label>
-<input type="file" id="file" class="button" accept="image/*" onchange="loadImage()"/><br />
-<label for="name">Name:</label>
-<input id="name" type="text" value="Image"><br />
-<label for="depth">Depth:</label>
-<input id="depth" type="number" value="29" min="1" max="29" step="1" onchange="depthChange()"> and <input id="depth2" type="number" value="30" size="24" readonly><br />
-<label for="type">Type:</label>
-<select id="type">
-	<option value="6">Misc1</option>
-	<option value="7">Misc2</option>
-	<option value="8">Misc3</option>
-	<option value="9">Misc4</option>
-	<option value="1">Bullet</option>
-	<option value="3">Spinner</option>
-	<option value="5">Character</option>
-</select><br />
-<label for="ako">AutoKill Time:</label>
-<input id="ako" type="number" value="15"><br />
-<label for="transparent">Transparent BG:</label>
-<input id="transparent" type="checkbox"><br />
-<button id="generate" onclick="generate()">Generate</button><br />
+<body bgcolor='#88FFC0'>
+<h1>Image to PA by GincentVeez <img src="MiniGV.png" width="50" style="vertical-align:middle"></h1>
+<p>
+	<label for="file">File:</label>
+	<input type="file" id="file" class="button" accept="image/*" onchange="loadImage()"/>
+</p>
+<p>
+	<label for="name">Name:</label>
+	<input id="name" type="text" value="Image">
+</p>
+<p>
+	<label for="depth">Depth:</label>
+	<input id="depth" type="number" value="28" min="1" max="28" step="1" onchange="depthChange()"> to 	<input id="depth2" type="number" value="30" size="24" readonly>
+</p>
+	<label for="type">Type:</label>
+	<select id="type">
+		<option value="6">Misc1</option>
+		<option value="7">Misc2</option>
+		<option value="8">Misc3</option>
+		<option value="9">Misc4</option>
+		<option value="1">Bullet</option>
+		<option value="3">Spinner</option>
+		<option value="5">Character</option>
+	</select>
+</p>
+<p>
+	<label for="ako">AutoKill Time:</label>
+	<input id="ako" type="number" value="15">
+</p>
+<p>
+	<label for="transparent">Transparent BG:</label>
+	<input id="transparent" type="checkbox">
+</p>
+<p>
+	<button id="generate" onclick="generate()">Generate</button>
+</p>
 <canvas id="canvas">Your browser does not support HTML5 canvas</canvas>
+<p id="size"></p>
 <h3>Take into account:</h3>
 <p>The images are made from &quot;&lt;color=#ffffff&gt;█ &quot; blocks. One of these prefabs has only 5 objects and souldn't lag the whole level, but will increase the level loading time.</p>
-<p>They might cause a little lag when being spawned and killed.</p>
-<p>Prefab takes two depth layers</p>
-<p>Try not to go beyond 1k pixels.</p>
+<p>They might cause a little lag when being spawned and killed, depending on the size of the prefab generated. They do cause lag when changing themes during the level. Other effects don't cause lag.</p>
+<p>Prefab takes three depth layers. Be careful with overlapping.</p>
+<p>Try not to go beyond 10k pixels.</p>
 <p>Does not support RGBA</p>
-<p>Checking Transparent BG makes invisible pixels the same color of the first pixel</p>
-<p>Pixel Art is better than detailed images since &quot;&lt;color=#ffffff&gt;█ █ █ █&quot; is better than &quot;&lt;color=#ffffff&gt;█ &lt;color=#fefefe&gt;█ &lt;color=#fdfdfd&gt;█ &lt;color=#fcfcfc&gt;█&quot;.</p>
+<p>Checking Transparent BG makes invisible pixels the same color of the first pixel.</p>
+<p>Pixel Art is better than detailed images even with images of the same size. This is because &quot;&lt;color=#ffffff&gt;█ █ █ █&quot; is better than &quot;&lt;color=#ffffff&gt;█ &lt;color=#fefefe&gt;█ &lt;color=#fdfdfd&gt;█ &lt;color=#fcfcfc&gt;█&quot;.</p>
 <p>One pixel is aproximately 1 unit wide.</p>
-<p>You can expand it and add keyframes to the Parent object.</p>
+<p>You can expand it and add keyframes to the Parent object. A big image will make keyframe editing slower.</p>
 <p>If you make pixels too small, █ blocks' smooth borders will start showing. If this occurs, finish editing the Parent object, apply changes to the prefab and add another instance of the prefab at the same time of the first one.</p>
 
 <script src="prefab.js"></script>
 <script>
 var fr,img,canvas,ctx // file reader, image, canvas, context
 function depthChange(){
-	document.getElementById('depth2').value = 1 + parseInt(document.getElementById('depth').value);
+	document.getElementById('depth2').value = 2 + parseInt(document.getElementById('depth').value);
 }
 function loadImage() {
 	var input = document.getElementById('file');
@@ -54,13 +69,14 @@ function createImage() {
     img.src = fr.result;
 }
 function imageLoaded() {
-    canvas = document.getElementById("canvas")
+    canvas = document.getElementById("canvas");
     canvas.width = img.width;
     canvas.height = img.height;
     ctx = canvas.getContext("2d");
     ctx.drawImage(img,0,0);
     if(img.width*img.height > 20000)
     	alert('Warning: More than 20k pixels!');
+    document.getElementById("size").innerHTML = canvas.width + ' × ' + canvas.height + ' = ' + canvas.width * canvas.height + ' pixels';
 }
 // https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
 function downloadObjectAsJson(exportObj, exportName){
@@ -89,7 +105,15 @@ function generate(){
 		o.d = (parseInt(o.ed.bin)%2) ? document.getElementById("depth").value : document.getElementById("depth2").value;
 		o.ako = document.getElementById("ako").value;
 	}
-	let s1='',s2='',c1='',c2='',x=1,transparent = '';
+	parent.d = document.getElementById("depth2").value;
+	t1.d = document.getElementById("depth").value;
+	t2.d = String(document.getElementById("depth2").value-1);
+	t12.d = String(document.getElementById("depth2").value-1);
+	t22.d = document.getElementById("depth2").value;
+
+	let s1='<size=27> </size>';
+	let s2=s1,s12=s1,s22=s1;
+	let c1='',c2='',c12='',c22='',x=1,y=1,transparent = '';
 	let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 	if (document.getElementById("transparent").checked)
 		transparent = hex(imgData[0]) + hex(imgData[1]) + hex(imgData[2]);
@@ -100,33 +124,60 @@ function generate(){
 		color += hex(imgData[i+2]);
 		if(color==transparent)
 			color = '00000000'
-		if(x%2){
-			if(color!=c1){
-				s1 += '<color=#'+color+'>'
-				c1 = color;
+		if(y%2){
+			if(x%2){
+				if(color!=c1){
+					s1 += '<color=#'+color+'>'
+					c1 = color;
+				}
+				s1 += '█  ';
 			}
-			s1 += '█  ';
+			else{
+				if(color!=c2){
+					s2 += '<color=#'+color+'>'
+					c2 = color;
+				}
+				s2 += '▊ ';
+			}
 		}
-		else{
-			if(color!=c2){
-				s2 += '<color=#'+color+'>'
-				c2 = color;
+		else {
+			if(x%2){
+				if(color!=c12){
+					s12 += '<color=#'+color+'>'
+					c12 = color;
+				}
+				s12 += '█  ';
 			}
-			s2 += '█ ';
+			else{
+				if(color!=c22){
+					s22 += '<color=#'+color+'>'
+					c22 = color;
+				}
+				s22 += '▊ ';
+			}
 		}
 		x++;
 		if(x>canvas.width){
-			s1 += '<br>';
-			s2 += '<br>';
+			if(y%2){
+				s1 += '<br><size=27> </size>';
+				s2 += '<br><size=27> </size>';
+			}
+			else {
+				s12 += '<br><size=27> </size>';
+				s22 += '<br><size=27> </size>';
+			}
 			x = 1;
+			y++;
 		}
 	}
 	t1.text = s1;
 	t2.text = s2;
-	t12.text = s1;
-	t22.text = s2;
-	t2.events.pos[0].x = String((img.width%2) ? 0 : w*1.5);
-	t22.events.pos[0].x = String((img.width%2) ? 0 : w*1.5);
+	t12.text = s12;
+	t22.text = s22;
+	t2.events.pos[0].x = String(((img.width%2) ? -.27 : w*1.147)-.98);
+	t22.events.pos[0].x = String(((img.width%2) ? -.27 : w*1.147))-.98;
+	t12.events.pos[0].y = String(((img.height%2) ? 0 : -w*1.553)-.15);
+	t22.events.pos[0].y = String(((img.height%2) ? 0 : -w*1.553)-.15);
 	downloadObjectAsJson(prefab,prefab.name.toLowerCase() + '.lsp');
 };
 
@@ -142,25 +193,25 @@ parent.scaEvent(0.,1.,1.);
 parent.rotEvent(0.,0.);
 parent.colEvent(0.,0);
 
-const w = .68
-t1.posEvent(0.,0.,0.);
-t1.scaEvent(0.,w,w*.733333);
+const w = .6365
+t1.posEvent(0.,-.98,-.15);
+t1.scaEvent(0.,w,w*1.1);
 t1.rotEvent(0.,0.);
 t1.colEvent(0.,0);
-t2.posEvent(0.,0,0.);
-t2.scaEvent(0.,w*1.348,w*.733333);
+t2.posEvent(0.,-.98,-.15);
+t2.scaEvent(0.,w*1.612,w*1.1);
 t2.rotEvent(0.,0.);
 t2.colEvent(0.,0);
 t1.p = parent.id;
 t1.parentOffset(true,true,true);
 t2.p = parent.id;
 t2.parentOffset(true,true,true);
-t12.posEvent(0.,0.,w*.5);
-t12.scaEvent(0.,w,w*.733333);
+t12.posEvent(0.,-.98,-.15);
+t12.scaEvent(0.,w,w*1.1);
 t12.rotEvent(0.,0.);
 t12.colEvent(0.,0);
-t22.posEvent(0.,0,w*.5);
-t22.scaEvent(0.,w*1.348,w*.733333);
+t22.posEvent(0.,-.98,-.15);
+t22.scaEvent(0.,w*1.612,w*1.1);
 t22.rotEvent(0.,0.);
 t22.colEvent(0.,0);
 t12.p = parent.id;
