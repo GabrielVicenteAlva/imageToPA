@@ -152,6 +152,9 @@ class PAObject {
 		this.o.x = String(ox);
 		this.o.y = String(oy);
 	}
+	setParent(obj){
+		this.p = obj.id;
+	}
 	parentOffset(posBool,scaBool,rotBool,posOffset=0.,scaOffset=0.,rotOffset=0.){
 		this.pt = posBool ? '1' : '0';
 		this.pt += scaBool ? '1' : '0';
