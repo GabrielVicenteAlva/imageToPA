@@ -12,7 +12,7 @@
 </p>
 <p>
 	<label for="depth">Depth:</label>
-	<input id="depth" type="number" value="28" min="1" max="28" step="1" onchange="depthChange()"> to 	<input id="depth2" type="number" value="30" size="24" readonly>
+	<input id="depth" type="number" value="30" min="1" max="30" step="1">
 </p>
 	<label for="type">Type:</label>
 	<select id="type">
@@ -21,7 +21,9 @@
 		<option value="8">Misc3</option>
 		<option value="9">Misc4</option>
 		<option value="1">Bullet</option>
+		<option value="2">Beam</option>
 		<option value="3">Spinner</option>
+		<option value="4">Pulse</option>
 		<option value="5">Character</option>
 	</select>
 </p>
@@ -31,7 +33,7 @@
 </p>
 <p>
 	<label for="transparent">Transparent BG:</label>
-	<input id="transparent" type="checkbox">
+	<input id="transparent" type="checkbox" onchange="transparentChange()">
 </p>
 <p>
 	<button id="generate" onclick="generate()">Generate</button>
@@ -39,22 +41,32 @@
 <canvas id="canvas">Your browser does not support HTML5 canvas</canvas>
 <p id="size"></p>
 <h3>Take into account:</h3>
-<p>The images are made from &quot;&lt;color=#ffffff&gt;█ &quot; blocks. One of these prefabs has only 5 objects and souldn't lag the whole level, but will increase the level loading time.</p>
+<p>The images are made from &quot;&lt;mark=#ffffff&gt; &quot; blocks. One of these prefabs is made out of only 2 objects and souldn't lag the whole level, but will increase the level loading time.</p>
 <p>They might cause a little lag when being spawned and killed, depending on the size of the prefab generated. They do cause lag when changing themes during the level. Other effects don't cause lag.</p>
-<p>Prefab takes three depth layers. Be careful with overlapping.</p>
-<p>Try not to go beyond 10k pixels.</p>
+<p>Try not to go beyond 16k pixels.</p>
 <p>Does not support RGBA</p>
 <p>Checking Transparent BG makes invisible pixels the same color of the first pixel.</p>
-<p>Pixel Art is better than detailed images even with images of the same size. This is because &quot;&lt;color=#ffffff&gt;█ █ █ █&quot; is better than &quot;&lt;color=#ffffff&gt;█ &lt;color=#fefefe&gt;█ &lt;color=#fdfdfd&gt;█ &lt;color=#fcfcfc&gt;█&quot;.</p>
+<p>Pixel Art is better than detailed images even with images of the same size, because &quot;&lt;mark=#ffffff&gt;   &quot; is better than &quot;&lt;mark=#ffffff&gt; &lt;mark=#fefefe&gt; &lt;mark=#fdfdfd&gt; &lt;mark=#fcfcfc&gt;&quot;.</p>
 <p>One pixel is aproximately 1 unit wide.</p>
 <p>You can expand it and add keyframes to the Parent object. A big image will make keyframe editing slower.</p>
-<p>If you make pixels too small, █ blocks' smooth borders will start showing. If this occurs, finish editing the Parent object, apply changes to the prefab and add another instance of the prefab at the same time of the first one.</p>
 
 <script src="prefab.js"></script>
 <script>
-var fr,img,canvas,ctx // file reader, image, canvas, context
-function depthChange(){
-	document.getElementById('depth2').value = 2 + parseInt(document.getElementById('depth').value);
+var fr,img,canvas,ctx,mtx // file reader, image, canvas, context
+function transparentChange(){
+	if(!document.getElementById('file').files[0])
+		return;
+	var imageData = ctx.createImageData(canvas.width,canvas.height);
+	var [transpR,transpG,transpB] = mtx;
+	var transpCheck = document.getElementById('transparent').checked;
+	for (let i = 0; i < imageData.data.length; i += 4) {
+		imageData.data[i] = mtx[i];
+		imageData.data[i+1] = mtx[i+1];
+		imageData.data[i+2] = mtx[i+2];
+		var transp = mtx[i]==transpR && mtx[i+1]==transpG && mtx[i+2]==transpB;
+		imageData.data[i+3] = (transpCheck && transp) ? 0 : mtx[i+3];
+	}
+	ctx.putImageData(imageData,0,0);
 }
 function loadImage() {
 	var input = document.getElementById('file');
@@ -77,6 +89,8 @@ function imageLoaded() {
     if(img.width*img.height > 20000)
     	alert('Warning: More than 20k pixels!');
     document.getElementById("size").innerHTML = canvas.width + ' × ' + canvas.height + ' = ' + canvas.width * canvas.height + ' pixels';
+	mtx = [...ctx.getImageData(0, 0, canvas.width, canvas.height).data];
+	transparentChange();
 }
 // https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
 function downloadObjectAsJson(exportObj, exportName){
@@ -101,19 +115,14 @@ function generate(){
 	prefab.name = document.getElementById("name").value;
 	prefab.type = document.getElementById("type").value;
 	
-	for(let o of prefab.objects){
-		o.d = (parseInt(o.ed.bin)%2) ? document.getElementById("depth").value : document.getElementById("depth2").value;
-		o.ako = document.getElementById("ako").value;
-	}
-	parent.d = document.getElementById("depth2").value;
-	t1.d = document.getElementById("depth").value;
-	t2.d = String(document.getElementById("depth2").value-1);
-	t12.d = String(document.getElementById("depth2").value-1);
-	t22.d = document.getElementById("depth2").value;
+	parent.ako = document.getElementById("ako").value;
+	t.ako = document.getElementById("ako").value;
+	
+	parent.d = document.getElementById("depth").value;
+	t.d = document.getElementById("depth").value;
 
-	let s1='<size=27> </size>';
-	let s2=s1,s12=s1,s22=s1;
-	let c1='',c2='',c12='',c22='',x=1,y=1,transparent = '';
+	let s='';
+	let lastColor='',x=1,y=1,transparent = '';
 	let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 	if (document.getElementById("transparent").checked)
 		transparent = hex(imgData[0]) + hex(imgData[1]) + hex(imgData[2]);
@@ -122,70 +131,26 @@ function generate(){
 		color += hex(imgData[i]);
 		color += hex(imgData[i+1]);
 		color += hex(imgData[i+2]);
-		if(color==transparent)
-			color = '00000000'
-		if(y%2){
-			if(x%2){
-				if(color!=c1){
-					s1 += '<color=#'+color+'>'
-					c1 = color;
-				}
-				s1 += '█  ';
-			}
-			else{
-				if(color!=c2){
-					s2 += '<color=#'+color+'>'
-					c2 = color;
-				}
-				s2 += '▊ ';
-			}
+		if(imgData[i+3]<255);
+			color += hex(imgData[i+3]);
+		if(x==1 || color!=lastColor){
+			s += '<mark=#'+color+'>'
+			lastColor = color;
 		}
-		else {
-			if(x%2){
-				if(color!=c12){
-					s12 += '<color=#'+color+'>'
-					c12 = color;
-				}
-				s12 += '█  ';
-			}
-			else{
-				if(color!=c22){
-					s22 += '<color=#'+color+'>'
-					c22 = color;
-				}
-				s22 += '▊ ';
-			}
-		}
+		s += ' ';
 		x++;
 		if(x>canvas.width){
-			if(y%2){
-				s1 += '<br><size=27> </size>';
-				s2 += '<br><size=27> </size>';
-			}
-			else {
-				s12 += '<br><size=27> </size>';
-				s22 += '<br><size=27> </size>';
-			}
-			x = 1;
+			s += '<mark=#00000000><color=#0000>0</color><br>';
 			y++;
+			x = 1;
 		}
 	}
-	t1.text = s1;
-	t2.text = s2;
-	t12.text = s12;
-	t22.text = s22;
-	t2.events.pos[0].x = String(((img.width%2) ? -.27 : w*1.147)-.98);
-	t22.events.pos[0].x = String(((img.width%2) ? -.27 : w*1.147))-.98;
-	t12.events.pos[0].y = String(((img.height%2) ? 0 : -w*1.553)-.15);
-	t22.events.pos[0].y = String(((img.height%2) ? 0 : -w*1.553)-.15);
+	t.text = s;
 	downloadObjectAsJson(prefab,prefab.name.toLowerCase() + '.lsp');
 };
 
 var parent = new PAObject(0.,30,shapes.sq,0,objectTypes.empty,autoKillTypes.fixedTime,10);
-var t1 = new PAObject(0.,30,shapes.txt(''),1,objectTypes.decoration,autoKillTypes.fixedTime,10);
-var t2 = new PAObject(0.,30,shapes.txt(''),2,objectTypes.decoration,autoKillTypes.fixedTime,10);
-var t12 = new PAObject(0.,30,shapes.txt(''),3,objectTypes.decoration,autoKillTypes.fixedTime,10);
-var t22 = new PAObject(0.,30,shapes.txt(''),4,objectTypes.decoration,autoKillTypes.fixedTime,10);
+var t = new PAObject(0.,30,shapes.txt(''),1,objectTypes.decoration,autoKillTypes.fixedTime,10);
 
 parent.name = 'Parent';
 parent.posEvent(0.,0.,0.);
@@ -193,31 +158,14 @@ parent.scaEvent(0.,1.,1.);
 parent.rotEvent(0.,0.);
 parent.colEvent(0.,0);
 
-const w = .6365
-t1.posEvent(0.,-.98,-.15);
-t1.scaEvent(0.,w,w*1.1);
-t1.rotEvent(0.,0.);
-t1.colEvent(0.,0);
-t2.posEvent(0.,-.98,-.15);
-t2.scaEvent(0.,w*1.612,w*1.1);
-t2.rotEvent(0.,0.);
-t2.colEvent(0.,0);
-t1.setParent(parent);
-t1.parentOffset(true,true,true);
-t2.setParent(parent);
-t2.parentOffset(true,true,true);
-t12.posEvent(0.,-.98,-.15);
-t12.scaEvent(0.,w,w*1.1);
-t12.rotEvent(0.,0.);
-t12.colEvent(0.,0);
-t22.posEvent(0.,-.98,-.15);
-t22.scaEvent(0.,w*1.612,w*1.1);
-t22.rotEvent(0.,0.);
-t22.colEvent(0.,0);
-t12.setParent(parent);
-t12.parentOffset(true,true,true);
-t22.setParent(parent);
-t22.parentOffset(true,true,true);
+t.name = 'TextObject';
+
+t.posEvent(0.,.499,0.);
+t.scaEvent(0.,1.234,0.598);
+t.rotEvent(0.,0.);
+t.colEvent(0.,0);
+t.setParent(parent);
+t.parentOffset(true,true,true);
 
 prefab.clean();
 </script>
