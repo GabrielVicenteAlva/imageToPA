@@ -48,7 +48,8 @@
 <p>Pixel Art is better than detailed images even with images of the same size, because &quot;&lt;mark=#ffffff&gt;   &quot; is better than &quot;&lt;mark=#ffffff&gt; &lt;mark=#fefefe&gt; &lt;mark=#fdfdfd&gt; &lt;mark=#fcfcfc&gt;&quot;.</p>
 <p>One pixel is aproximately 1 unit wide.</p>
 <p>You can expand it and add keyframes to the Parent object. A big image will make keyframe editing slower.</p>
-<p>For a linear gradient use a 1 pixel <b>high</b> image and stretch the object</p>
+<p>Have a preference for horizontal images: flip vertical ones, generate the prefab and flip them back in the editor.</p>
+<p>For a linear gradient use a 1 pixel high image and stretch the object</p>
 
 <script src="prefab.js"></script>
 <script>
@@ -127,13 +128,17 @@ function generate(){
 	if (document.getElementById("transparent").checked)
 		transparent = hex(imgData[0]) + hex(imgData[1]) + hex(imgData[2]);
 	for (let i = 0; i < imgData.length; i += 4) {
+		if(x==1){
+			s += '<mark=#00000000> ';
+			lastColor='00000000';
+		}
 		var color = '';
 		color += hex(imgData[i]);
 		color += hex(imgData[i+1]);
 		color += hex(imgData[i+2]);
 		if(imgData[i+3]<255);
 			color += hex(imgData[i+3]);
-		if(x==1 || color!=lastColor){
+		if(color!=lastColor){
 			s += '<mark=#'+color+'>'
 			lastColor = color;
 		}
@@ -160,7 +165,7 @@ parent.colEvent(0.,0);
 
 t.name = 'TextObject';
 
-t.posEvent(0.,.499,0.);
+t.posEvent(0.,.48,0.);
 t.scaEvent(0.,1.234,0.598);
 t.rotEvent(0.,0.);
 t.colEvent(0.,0);
